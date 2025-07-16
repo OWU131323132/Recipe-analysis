@@ -2,14 +2,12 @@ import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 
-# APIキー取得
 def get_api_key():
     try:
         return st.secrets["GEMINI_API_KEY"]
     except KeyError:
         return st.text_input("Gemini APIキー:", type="password")
 
-# Gemini APIによる栄養解析
 def analyze_nutrition(dish_name, api_key):
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-pro")
@@ -17,7 +15,6 @@ def analyze_nutrition(dish_name, api_key):
     response = model.generate_content(prompt)
     return response.text
 
-# 栄養成分のパース
 def parse_nutrition(text):
     data = {}
     import re
@@ -29,7 +26,6 @@ def parse_nutrition(text):
                     data[nutrient] = float(match.group(1))
     return data
 
-# 食事履歴の保存
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -42,7 +38,6 @@ def display_history():
         df = pd.DataFrame(st.session_state.history)
         st.dataframe(df)
 
-        # 摂取量合計を計算
         nutrients = ["エネルギー", "たんぱく質", "脂質", "糖質", "カリウム"]
         totals = df[nutrients].sum()
 
@@ -51,7 +46,6 @@ def display_history():
     else:
         st.write("食事履歴がありません。")
 
-# メインアプリ
 def main():
     st.title("AI栄養解析＆献立提案アプリ")
 
