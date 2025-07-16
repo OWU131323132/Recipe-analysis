@@ -11,15 +11,13 @@ def get_api_key():
 
 def analyze_nutrition(dish_name, api_key):
     genai.configure(api_key=api_key)
-
-    # chatベースで会話を開始
-    model = genai.GenerativeModel(model_name="gemini-pro")
-    chat = model.start_chat(history=[])
+    # 正しいモデル名に修正
+    model = genai.GenerativeModel(model_name="models/gemini-1.5-pro-latest")
 
     prompt = f"{dish_name}の栄養成分（エネルギー、たんぱく質、脂質、糖質、カリウム）を具体的な数値で教えてください。単位もつけてください。"
 
     try:
-        response = chat.send_message(prompt)
+        response = model.generate_content([prompt])
         return response.text
     except Exception as e:
         return f"エラーが発生しました: {e}"
