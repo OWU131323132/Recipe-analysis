@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
+import re
 
 def get_api_key():
     try:
@@ -10,14 +11,19 @@ def get_api_key():
 
 def analyze_nutrition(dish_name, api_key):
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-pro")
+    # 正しいモデル名に修正
+    model = genai.GenerativeModel(model_name="models/gemini-pro")  
+
     prompt = f"{dish_name}の栄養成分（エネルギー、たんぱく質、脂質、糖質、カリウム）を具体的な数値で教えてください。単位もつけてください。"
-    response = model.generate_content(prompt)
-    return response.text
+
+    try:
+        response = model.generate_content([prompt])
+        return response.text
+    except Exception as e:
+        return f"エラーが発生しました: {e}"
 
 def parse_nutrition(text):
     data = {}
-    import re
     for line in text.split('\n'):
         for nutrient in ["エネルギー", "たんぱく質", "脂質", "糖質", "カリウム"]:
             if nutrient in line:
@@ -40,7 +46,6 @@ def display_history():
 
         nutrients = ["エネルギー", "たんぱく質", "脂質", "糖質", "カリウム"]
         totals = df[nutrients].sum()
-
         st.subheader("摂取量のグラフ")
         st.bar_chart(totals)
     else:
@@ -84,11 +89,7 @@ def main():
         df = pd.DataFrame(st.session_state.history)
         nutrients = ["エネルギー", "たんぱく質", "脂質", "糖質", "カリウム"]
         totals = df[nutrients].sum()
-
-        df_compare = pd.DataFrame({
-            "摂取量": totals,
-            "目標量": pd.Series(target)
-        })
+        df_compare = pd.DataFrame({"摂取量": totals, "目標量": pd.Series(target)})
         st.subheader("摂取量と目標量の比較グラフ")
         st.bar_chart(df_compare)
 
